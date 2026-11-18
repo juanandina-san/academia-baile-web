@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Academia de Baile</title>
+
+  <!-- Google Fonts: Playfair Display (elegant headings) + Inter (clean body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+  <!-- Phosphor Icons -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<section id="login">
+  <div class="login-bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+  </div>
+  <form id="fLogin" class="card">
+    <div class="login-logo">
+      <div class="logo-icon"><i class="ph ph-music-notes"></i></div>
+      <h1>Academia de Baile</h1>
+      <p class="login-subtitle">Sistema de gestión</p>
+    </div>
+    <div class="input-group">
+      <i class="ph ph-envelope-simple"></i>
+      <input name="email" type="email" placeholder="Email" required aria-label="Email">
+    </div>
+    <div class="input-group">
+      <i class="ph ph-lock-simple"></i>
+      <input name="password" type="password" placeholder="Contraseña" required aria-label="Contraseña">
+    </div>
+    <button type="submit"><span>Ingresar</span><i class="ph ph-sign-in"></i></button>
+    <p id="loginErr" class="err"></p>
+  </form>
+</section>
+
+<!-- MAIN APP -->
+<div id="app" hidden>
+  <aside id="menu">
+    <div class="menu-header">
+      <div class="menu-logo"><i class="ph-fill ph-music-notes"></i></div>
+      <h2>Academia</h2>
+    </div>
+    <nav class="menu-nav">
+      <a data-v="dashboard"><i class="ph ph-chart-pie-slice"></i><span>Panel</span></a>
+      <a data-v="alumnos"><i class="ph ph-users"></i><span>Alumnos</span></a>
+      <a data-v="clases"><i class="ph ph-music-notes-simple"></i><span>Clases</span></a>
+      <a data-v="pagos"><i class="ph ph-credit-card"></i><span>Pagos</span></a>
+      <a data-v="ia"><i class="ph ph-robot"></i><span>Asistente IA</span></a>
+    </nav>
+    <a id="salir"><i class="ph ph-sign-out"></i><span>Salir</span></a>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <button id="burger" aria-label="Abrir menú"><i class="ph-bold ph-list"></i></button>
+      <div class="topbar-spacer"></div>
+    </header>
+    <div id="vista"></div>
+  </main>
+</div>
+
+<!-- OVERLAY for mobile sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+
+<script src="js/app.js"></script>
+<script>
+  // Sidebar overlay close behavior for mobile
+  const overlay = document.getElementById('sidebarOverlay');
+  if (overlay) {
+    overlay.addEventListener('click', () => {
+      document.getElementById('menu').classList.remove('open');
+      overlay.classList.remove('visible');
+    });
+  }
+  // Extend burger to also toggle overlay
+  const origBurger = document.getElementById('burger');
+  if (origBurger) {
+    origBurger.addEventListener('click', () => {
+      const isOpen = document.getElementById('menu').classList.contains('open');
+      if (overlay) overlay.classList.toggle('visible', isOpen);
+    });
+  }
+</script>
+</body>
+</html>

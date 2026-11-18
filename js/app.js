@@ -165,6 +165,13 @@ const AL = [
   ['email', 'Email', 'email']
 ];
 
+const PROF = [
+  ['nombre', 'Nombre'],
+  ['apellido', 'Apellido'],
+  ['telefono', 'Teléfono', 'tel'],
+  ['email', 'Email', 'email']
+];
+
 const DIAS = [
   ['1', 'Lunes'],
   ['2', 'Martes'],
@@ -431,10 +438,7 @@ const vistas = {
       }</div>`;
 
     if (user.rol !== 'admin') return;
-    $('#np').onclick = () =>
-      dialogo('Nuevo profesor', AL.slice(0, 2), {}, d =>
-        api('clases/profesores', 'POST', d)
-      );
+    $('#np').onclick = profesorNuevo;
     $('#nc').onclick = () =>
       dialogo(
         'Nueva clase',
@@ -459,6 +463,100 @@ const vistas = {
             horarios: [{ dia: d.dia, inicio: d.inicio, fin: d.fin }]
           })
       );
+  },
+
+  async profesores() {
+    $('#vista').innerHTML = `
+      <header class="page-head">
+        <div><p class="eyebrow">Equipo docente</p><h1>Profesores</h1></div>
+      </header>
+      <div class="bar">
+        <span class="search">${icono(
+          'magnifying-glass'
+        )}<input id="qprof" type="search" placeholder="Buscar por nombre, apellido o email" aria-label="Buscar profesores"></span>
+        <select id="estprof" aria-label="Filtrar profesores por estado">
+          <option value="activos">Activos</option>
+          <option value="inactivos">Dados de baja</option>
+          <option value="todos">Todos</option>
+        </select>
+        ${
+          user.rol === 'admin'
+            ? `<button id="nuevoProf">${icono('plus')}Nuevo profesor</button>`
+            : ''
+        }
+      </div>
+      <div class="tbl" id="listaProf">${skeleton()}</div>`;
+
+    const cargar = async () => {
+      const l = await api(
+        `profesores?q=${encodeURIComponent($('#qprof').value)}&estado=${
+          $('#estprof').value
+        }`
+      );
+      $('#listaProf').innerHTML = l.length
+        ? `<table><thead><tr><th scope="col">Profesor</th><th scope="col">Contacto</th><th scope="col" class="num">Clases</th><th scope="col" class="num">Alumnos</th><th scope="col">Estado</th><th scope="col"><span class="sr-only">Acciones</span></th></tr></thead><tbody>${l
+            .map(
+              p => `<tr>
+          <td><div class="who"><span class="avatar">${ini(
+            p.nombre,
+            p.apellido
+          )}</span><div><b>${esc(p.apellido)}, ${esc(
+                p.nombre
+              )}</b><small>${
+                p.clases
+                  ? `${p.clases} clase${p.clases === 1 ? '' : 's'} a cargo`
+                  : 'Sin clases asignadas'
+              }</small></div></div></td>
+          <td>${esc(p.telefono || '—')}${
+                p.email ? `<br><small class="muted">${esc(p.email)}</small>` : ''
+              }</td>
+          <td class="num">${p.clases}</td>
+          <td class="num">${p.alumnos}</td>
+          <td>${tag(p.activo ? 'activo' : 'inactivo')}</td>
+          <td>
+            <button class="mini icon-only" title="Ver ficha" aria-label="Ver ficha de ${esc(
+              p.nombre
+            )}" onclick="fichaProfesor(${p.id})">${icono('eye')}</button>
+            ${
+              user.rol === 'admin'
+                ? `<button class="mini sec icon-only" title="Editar" aria-label="Editar a ${esc(
+                    p.nombre
+                  )}" onclick="editarProfesor(${p.id})">${icono(
+                    'pencil-simple'
+                  )}</button>
+            ${
+              p.activo
+                ? `<button class="mini sec icon-only" title="Dar de baja" aria-label="Dar de baja a ${esc(
+                    p.nombre
+                  )}" onclick="bajaProfesor(${p.id})">${icono('user-minus')}</button>`
+                : `<button class="mini sec icon-only" title="Reactivar" aria-label="Reactivar a ${esc(
+                    p.nombre
+                  )}" onclick="reactivarProfesor(${p.id})">${icono(
+                    'user-check'
+                  )}</button>`
+            }
+            <button class="mini sec icon-only danger-ghost" title="Eliminar definitivamente" aria-label="Eliminar a ${esc(
+              p.nombre
+            )}" onclick="eliminarProfesor(${p.id})">${icono('trash')}</button>`
+                : ''
+            }
+          </td></tr>`
+            )
+            .join('')}</tbody></table>`
+        : vacio(
+            'chalkboard-teacher',
+            'Sin profesores para mostrar',
+            'Probá con otro filtro o sumá el primero con “Nuevo profesor”.'
+          );
+    };
+
+    $('#qprof').oninput = () => {
+      clearTimeout(busquedaTimer);
+      busquedaTimer = setTimeout(cargar, 220);
+    };
+    $('#estprof').onchange = cargar;
+    await cargar();
+    if (user.rol === 'admin') $('#nuevoProf').onclick = profesorNuevo;
   },
 
   async pagos() {
@@ -684,6 +782,7 @@ const etiquetaVista = {
   dashboard: 'Panel',
   alumnos: 'Alumnos',
   clases: 'Clases',
+  profesores: 'Profesores',
   pagos: 'Pagos',
   ia: 'Asistente IA'
 };
@@ -877,6 +976,124 @@ window.ficha = async id => {
     <div class="dlg-actions"><button type="button" class="sec" onclick="cerrarDlg()">Cerrar</button></div>`;
   $('#dlgForm').onsubmit = null;
   $('#dlg').showModal();
+};
+
+/* ─── Profesores ─────────────────────────────────────────────── */
+window.profesorNuevo = () =>
+  dialogo('Nuevo profesor', PROF, {}, d => api('profesores', 'POST', d));
+
+window.editarProfesor = async id => {
+  const p = await api('profesores/' + id);
+  dialogo(
+    'Editar profesor',
+    [
+      ...PROF,
+      [
+        'activo',
+        'Estado',
+        'text',
+        [
+          ['1', 'Activo'],
+          ['0', 'Dado de baja']
+        ]
+      ]
+    ],
+    p,
+    d => api('profesores/' + id, 'PUT', d)
+  );
+};
+
+window.fichaProfesor = async id => {
+  const p = await api('profesores/' + id);
+  $('#dlgForm').innerHTML = `
+    <div class="ficha-head">
+      <span class="avatar lg">${ini(p.nombre, p.apellido)}</span>
+      <div>
+        <h3 id="dlgTitle">${esc(p.apellido)}, ${esc(p.nombre)}</h3>
+        <p class="muted">${esc(p.email || 'Sin email')}${
+          p.telefono ? ' · ' + esc(p.telefono) : ''
+        }</p>
+      </div>
+      ${tag(p.activo ? 'activo' : 'inactivo')}
+    </div>
+    <div class="ficha-section">
+      <h4>Clases a cargo</h4>
+      ${
+        p.clases.length
+          ? p.clases
+              .map(
+                c =>
+                  `<div class="list-row"><span>${esc(c.nombre)}${
+                    c.activa ? '' : ' <span class="muted">· dada de baja</span>'
+                  }</span><span class="cupo"><b>${c.inscriptos}</b>/${
+                    c.cupo_maximo
+                  }</span></div>`
+              )
+              .join('')
+          : `<div class="list-row muted">Sin clases asignadas</div>`
+      }
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="sec" onclick="cerrarDlg()">Cerrar</button>
+      ${
+        user.rol === 'admin'
+          ? `<button type="button" onclick="cerrarDlg();editarProfesor(${p.id})">Editar</button>`
+          : ''
+      }
+    </div>`;
+  $('#dlgForm').onsubmit = null;
+  $('#dlg').showModal();
+};
+
+window.bajaProfesor = async id => {
+  const ok = await confirmar({
+    titulo: 'Dar de baja al profesor',
+    cuerpo:
+      'Dejará de aparecer al asignar clases. Solo es posible si no tiene clases activas.',
+    ok: 'Dar de baja'
+  });
+  if (!ok) return;
+  try {
+    await api('profesores/' + id, 'DELETE');
+    toast('Profesor dado de baja', 'success');
+    show(cur);
+  } catch (e) {
+    alerta(e);
+  }
+};
+
+window.reactivarProfesor = async id => {
+  try {
+    const p = await api('profesores/' + id);
+    await api('profesores/' + id, 'PUT', {
+      nombre: p.nombre,
+      apellido: p.apellido,
+      telefono: p.telefono,
+      email: p.email,
+      activo: 1
+    });
+    toast('Profesor reactivado', 'success');
+    show(cur);
+  } catch (e) {
+    alerta(e);
+  }
+};
+
+window.eliminarProfesor = async id => {
+  const ok = await confirmar({
+    titulo: 'Eliminar definitivamente',
+    cuerpo:
+      'Esta acción no se puede deshacer y solo está disponible si el profesor nunca tuvo clases.',
+    ok: 'Eliminar'
+  });
+  if (!ok) return;
+  try {
+    await api('profesores/' + id + '/definitivo', 'DELETE');
+    toast('Profesor eliminado', 'success');
+    show(cur);
+  } catch (e) {
+    alerta(e);
+  }
 };
 
 /* ─── Clases ─────────────────────────────────────────────────── */

@@ -40,4 +40,4 @@ Concepto *Estudio*: papel marfil, tinta ciruela, vino y oro; Fraunces para displ
 
 ## Funcionalidad cubierta
 
-Login con JWT, panel con KPIs y gráficos, padrón de alumnos con ficha e historial, clases con cupos e inscripciones, pagos y reporte mensual, asistente IA de solo lectura, menú responsive y estados de carga/vacío.
+Login con JWT, panel con KPIs y gráficos, padrón de alumnos con ficha e historial, CRUD de profesores con ficha y clases a cargo, clases con cupos e inscripciones, pagos y reporte mensual, asistente IA de solo lectura, menú responsive y estados de carga/vacío.

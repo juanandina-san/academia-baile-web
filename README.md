@@ -1,11 +1,11 @@
 # Academia de Baile — Frontend
 
-SPA en HTML, CSS y JavaScript vanilla que consume la API del backend (`E:\meto\backend`). No requiere build ni dependencias: el backend sirve esta carpeta como estático.
+SPA en HTML, CSS y JavaScript vanilla que consume la API del backend (`E:\meto\repos\academia-baile-api`). No requiere build ni dependencias: el backend sirve esta carpeta como estático.
 
 ## Cómo levantarlo
 
 ```bash
-cd ../backend
+cd ../academia-baile-api
 npm install
 npm run dev
 ```
@@ -17,7 +17,7 @@ Para probar solo la interfaz sin base de datos se puede servir la carpeta con cu
 ## Estructura
 
 ```
-frontend/
+academia-baile-web/
 ├── index.html                  # Shell: login, sidebar, topbar, diálogos y toasts
 ├── css/styles.css              # Design system "Estudio" (tokens, componentes, responsive)
 ├── js/app.js                   # Vistas, API, gráficos, feedback y acciones

@@ -1,6 +1,6 @@
 # Academia de Baile — Frontend
 
-SPA en HTML, CSS y JavaScript vanilla que consume la API del backend (`E:\meto\repos\academia-baile-api`). No requiere build ni dependencias: el backend sirve esta carpeta como estático.
+SPA en HTML, CSS y JavaScript vanilla que consume la API del backend (`E:\meto\repos\academia-baile-api`). No requiere frameworks ni dependencias. El backend sirve esta carpeta como estático en local; para producción se despliega en Vercel o Netlify con la API externa, según [DEPLOY.md](DEPLOY.md).
 
 ## Cómo levantarlo
 
@@ -22,6 +22,9 @@ academia-baile-web/
 ├── css/styles.css              # Design system "Estudio" (tokens, componentes, responsive)
 ├── js/app.js                   # Vistas, API, gráficos, feedback y acciones
 ├── design-system/academia/     # MASTER.md: fuente de verdad de diseño
+├── scripts/build.js            # Genera dist/ y configura API_URL
+├── vercel.json / netlify.toml  # Configuración de despliegue
+├── DEPLOY.md                   # Guía de despliegue
 └── README.md
 ```
 

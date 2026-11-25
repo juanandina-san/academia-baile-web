@@ -3,7 +3,8 @@
    Conserva rutas, IDs y flujo del frontend legacy.
    ═══════════════════════════════════════════════════════════════ */
 
-const $ = s => document.querySelector(s),
+const API_ORIGIN = (window.ACADEMIA_API_ORIGIN || '').replace(/\/$/, ''),
+  $ = s => document.querySelector(s),
   esc = t =>
     String(t ?? '').replace(
       /[&<>"']/g,
@@ -107,7 +108,7 @@ const api = async (url, method = 'GET', body) => {
   pendientes++;
   document.body.classList.add('is-loading');
   try {
-    const r = await fetch('/api/' + url, {
+    const r = await fetch(API_ORIGIN + '/api/' + url, {
       method,
       headers: {
         'Content-Type': 'application/json',
